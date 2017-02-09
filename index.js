@@ -79,7 +79,7 @@ function notifyDiscord(imageUrl, payload, location, action) {
 	var data = {
 		"content": "",
 		"username": "Plex",
-		"avatar_url": path.join(appURL, "/plex-icon.png"),
+		"avatar_url": appURL + "/plex-icon.png",
 		"embeds": [
 			{
 				"title": formatTitle(payload.Metadata),
