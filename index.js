@@ -1,5 +1,6 @@
 ﻿var express = require('express')
 	, http = require('http')
+	, path = require('path')
 	, multer = require('multer')
 	, redis = require("redis")
 	, lwip = require('lwip')
@@ -15,13 +16,6 @@ var webhookKey = process.env.DISCORD_WEBHOOK_KEY;
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, { return_buffers: true });
 var upload = multer({ storage: multer.memoryStorage() });
 var app = express();
-
-var stdo = fs.createWriteStream('/var/log/node-server/log.txt');
-process.stdout.write = (function (write) {
-	return function (string, encoding, fd) {
-		stdo.write(string);
-	}
-})(process.stdout.write)
 
 function formatTitle(metadata) {
 	if (metadata.grandparentTitle) {
@@ -57,10 +51,14 @@ function formatSubtitle(metadata) {
 }
 
 function notifyDiscord(imageUrl, payload, location, action) {
+	console.log('Notify Discord reached');
+
 	var locationText = '';
 	if (location) {
 		locationText = ' near ' + location.city + ', ' + (location.country_code == 'US' ? location.region_name : location.country_name);
 	}
+
+	console.log('Location: ' + locationText);
 
 	var data = querystring.stringify({
 		"content": "",
@@ -113,6 +111,7 @@ function notifyDiscord(imageUrl, payload, location, action) {
 }
 
 app.post('/', upload.single('thumb'), function (req, res, next) {
+	console.log('POST received');
 	var payload = JSON.parse(req.body.payload);
 	var isVideo = (payload.Metadata.librarySectionType == "movie" || payload.Metadata.librarySectionType == "show");
 	var isAudio = (payload.Metadata.librarySectionType == "artist");
