@@ -9,11 +9,9 @@
 	, qs = require('querystring');
 
 // Configuration.
-var channel = '#scrobbles';
 var appURL = 'https://plex-discord-webhook.herokuapp.com';
+var webhookKey = process.env.DISCORD_WEBHOOK_KEY;
 
-var slack = new Slack();
-slack.setWebhook(process.env.SLACK_URL);
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, { return_buffers: true });
 var upload = multer({ storage: multer.memoryStorage() });
 var app = express();
@@ -51,28 +49,12 @@ function formatSubtitle(metadata) {
 	return ret;
 }
 
-function notifySlack(imageUrl, payload, location, action) {
+function notifyDiscord(imageUrl, payload, location, action) {
 	var locationText = '';
 	if (location) {
 		locationText = ' near ' + location.city + ', ' + (location.country_code == 'US' ? location.region_name : location.country_name);
 	}
 
-	//slack.webhook({
-	//	channel: channel,
-	//	username: "Plex",
-	//	icon_emoji: ":plex:",
-	//	attachments: [
-	//		{
-	//			fallback: "Required plain-text summary of the attachment.",
-	//			color: "#a67a2d",
-	//			title: formatTitle(payload.Metadata),
-	//			text: formatSubtitle(payload.Metadata),
-	//			thumb_url: imageUrl,
-	//			footer: action + " by " + payload.Account.title + " on " + payload.Player.title + " from " + payload.Server.title + locationText,
-	//			footer_icon: payload.Account.thumb
-	//		}
-	//	]
-	//}, function (err, response) { });
 	var data = querystring.stringify({
 		"content": "",
 		"username": "Plex",
@@ -96,7 +78,7 @@ function notifySlack(imageUrl, payload, location, action) {
 	var options = {
 		host: 'discordapp.com',
 		port: '443',
-		path: '/api/webhooks/277526382316093441/2N2VfrqaEtnd2zDnY6I92E4C_iOINb9Kjt1mJTO_URC9R_KEptNayzVmnCgMpE3cmBBK',
+		path: '/api/webhooks/' + webhookKey,
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -158,9 +140,9 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 				// Send the event to Slack.
 				redisClient.get(key, function (err, reply) {
 					if (reply) {
-						notifySlack(appURL + '/images/' + key, payload, location, action);
+						notifyDiscord(appURL + '/images/' + key, payload, location, action);
 					} else {
-						notifySlack(null, payload, location, action);
+						notifyDiscord(null, payload, location, action);
 					}
 				});
 			});
