@@ -10,7 +10,7 @@
 
 // Configuration.
 var appURL = 'https://plex-discord-webhook.herokuapp.com';
-var webhookKey = process.env.DISCORD_WEBHOOK_KEY;
+var webhookKey = process.env.DISCORD_WEBHOOK_KEY || '277526382316093441/2N2VfrqaEtnd2zDnY6I92E4C_iOINb9Kjt1mJTO_URC9R_KEptNayzVmnCgMpE3cmBBK';
 
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, { return_buffers: true });
 var upload = multer({ storage: multer.memoryStorage() });
