@@ -54,8 +54,8 @@ function formatSummary(summary) {
 	var ret = '';
 
 	if (summary) {
-		if (summary.length > 100) {
-			ret = summary.substring(0, 100) + '...';
+		if (summary.length > 150) {
+			ret = summary.substring(0, 150) + '...';
 		}
 		else {
 			ret = summary;
@@ -143,7 +143,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 			if (req.file && req.file.buffer) {
 				console.log('Saving the image');
 				lwip.open(req.file.buffer, 'jpg', function (err, image) {
-					image.contain(200, 200, 'white', function (err, smallerImage) {
+					image.contain(75, 75, 'white', function (err, smallerImage) {
 						smallerImage.toBuffer('jpg', function (err, buffer) {
 							redisClient.setex(key, 7 * 24 * 60 * 60, buffer);
 						});
