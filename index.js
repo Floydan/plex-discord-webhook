@@ -73,6 +73,7 @@ function formatSummary(summary) {
 function notifyDiscord(imageUrl, payload, location, action) {
 	var locationText = '';
 	if (location) {
+		console.log(location);
 		locationText = ' near ' + location.city + ', ' + (location.country_code == 'US' ? location.region_name : location.country_name);
 	}
 
