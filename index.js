@@ -56,12 +56,12 @@ function formatSummary(summary) {
 	var ret = '';
 
 	if (summary) {
-		if (summary.length > 300) {
-			ret = summary.substring(0, 300) + '...';
-		}
-		else {
+		//if (summary.length > 300) {
+		//	ret = summary.substring(0, 300) + '...';
+		//}
+		//else {
 			ret = summary;
-		}
+		//}
 
 		if (ret.length > 0)
 			ret = '\r\n' + ret;
