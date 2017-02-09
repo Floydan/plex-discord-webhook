@@ -89,9 +89,9 @@ function notifyDiscord(imageUrl, payload, location, action) {
 
 	var httpreq = http.request(options, function (response) {
 		response.setEncoding('utf8');
-		//response.on('data', function (chunk) {
-		//	console.log("body: " + chunk);
-		//});
+		response.on('data', function (chunk) {
+			console.log("body: " + chunk);
+		});
 		response.on('end', function () {
 			res.send('ok');
 		})
