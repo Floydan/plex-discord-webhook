@@ -1,5 +1,5 @@
 ﻿var express = require('express')
-	, http = require('http')
+	, request = require('request')
 	, path = require('path')
 	, multer = require('multer')
 	, redis = require("redis")
@@ -56,7 +56,7 @@ function notifyDiscord(imageUrl, payload, location, action) {
 		locationText = ' near ' + location.city + ', ' + (location.country_code == 'US' ? location.region_name : location.country_name);
 	}
 
-	var data = qs.stringify({
+	var data = {
 		"content": "",
 		"username": "Plex",
 		"embeds": [
@@ -74,31 +74,40 @@ function notifyDiscord(imageUrl, payload, location, action) {
 				}
 			}
 		]
-	});
+	};
 
-	var options = {
-		host: 'discordapp.com',
-		port: 443,
-		path: '/api/webhooks/' + webhookKey,
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			'Content-Length': Buffer.byteLength(data)
+	request.post('https://discordapp.com/api/webhooks/' + webhookKey,
+		{ json: data },
+		function (error, response, body) {
+			if (!error && response.statusCode == 200) {
+				console.log(body)
+			}
 		}
-	}
+	);
 
-	var httpreq = http.request(options, function (response) {
-		response.setEncoding('utf8');
-		response.on('data', function (chunk) {
-			console.log("body: " + chunk);
-		});
-		response.on('end', function () {
-			res.send('ok');
-		})
-	});
+	//var options = {
+	//	host: 'discordapp.com',
+	//	port: 443,
+	//	path: '/api/webhooks/' + webhookKey,
+	//	method: 'POST',
+	//	headers: {
+	//		'Content-Type': 'application/json',
+	//		'Content-Length': Buffer.byteLength(data)
+	//	}
+	//}
 
-	httpreq.write(data);
-	httpreq.end();
+	//var httpreq = http.request(options, function (response) {
+	//	response.setEncoding('utf8');
+	//	response.on('data', function (chunk) {
+	//		console.log("body: " + chunk);
+	//	});
+	//	response.on('end', function () {
+	//		//res.send('ok');
+	//	})
+	//});
+
+	//httpreq.write(data);
+	//httpreq.end();
 
 	console.log('post complete');
 }
