@@ -116,6 +116,8 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 	var isVideo = (payload.Metadata.librarySectionType == "movie" || payload.Metadata.librarySectionType == "show");
 	var isAudio = (payload.Metadata.librarySectionType == "artist");
 
+	console.log('Payload: ', payload);
+
 	if (payload.user == true && payload.Metadata && (isAudio || isVideo)) {
 		var key = sha1(payload.Server.uuid + payload.Metadata.guid);
 
@@ -149,7 +151,9 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 					}
 				}
 
-				// Send the event to Slack.
+
+
+				// Send the event to Discord.
 				redisClient.get(key, function (err, reply) {
 					if (reply) {
 						notifyDiscord(appURL + '/images/' + key, payload, location, action);
