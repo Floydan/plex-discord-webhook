@@ -17,6 +17,8 @@ var redisClient = redis.createClient(process.env.REDISCLOUD_URL, { return_buffer
 var upload = multer({ storage: multer.memoryStorage() });
 var app = express();
 
+app.use(express.static('images'));
+
 function formatTitle(metadata) {
 	if (metadata.grandparentTitle) {
 		return metadata.grandparentTitle;
