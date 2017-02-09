@@ -80,7 +80,7 @@ function notifyDiscord(imageUrl, payload, location, action) {
 		"embeds": [
 			{
 				"title": formatTitle(payload.Metadata),
-				"description": formatSubtitle(payload.Metadata) + formatSummary(payload.summary),
+				"description": formatSubtitle(payload.Metadata) + formatSummary(payload.Metadata.summary),
 				"footer": {
 					"text": action + " by " + payload.Account.title + " on " + payload.Player.title + " from " + payload.Server.title + locationText,
 					"icon_url": payload.Account.thumb
@@ -143,7 +143,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 			if (req.file && req.file.buffer) {
 				console.log('Saving the image');
 				lwip.open(req.file.buffer, 'jpg', function (err, image) {
-					image.contain(75, 75, 'white', function (err, smallerImage) {
+					image.contain(200, 200, 'white', function (err, smallerImage) {
 						smallerImage.toBuffer('jpg', function (err, buffer) {
 							redisClient.setex(key, 7 * 24 * 60 * 60, buffer);
 						});
