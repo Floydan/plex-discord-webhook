@@ -16,6 +16,13 @@ var redisClient = redis.createClient(process.env.REDISCLOUD_URL, { return_buffer
 var upload = multer({ storage: multer.memoryStorage() });
 var app = express();
 
+var stdo = fs.createWriteStream('/var/log/node-server/log.txt');
+process.stdout.write = (function (write) {
+	return function (string, encoding, fd) {
+		stdo.write(string);
+	}
+})(process.stdout.write)
+
 function formatTitle(metadata) {
 	if (metadata.grandparentTitle) {
 		return metadata.grandparentTitle;
