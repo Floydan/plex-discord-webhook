@@ -56,8 +56,8 @@ function formatSummary(summary) {
 	var ret = '';
 
 	if (summary) {
-		if (summary.length > 150) {
-			ret = summary.substring(0, 150) + '...';
+		if (summary.length > 300) {
+			ret = summary.substring(0, 300) + '...';
 		}
 		else {
 			ret = summary;
