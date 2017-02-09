@@ -51,16 +51,12 @@ function formatSubtitle(metadata) {
 }
 
 function notifyDiscord(imageUrl, payload, location, action) {
-	console.log('Notify Discord reached');
-
 	var locationText = '';
 	if (location) {
 		locationText = ' near ' + location.city + ', ' + (location.country_code == 'US' ? location.region_name : location.country_name);
 	}
 
-	console.log('Location: ' + locationText);
-
-	var data = querystring.stringify({
+	var data = qs.stringify({
 		"content": "",
 		"username": "Plex",
 		"embeds": [
@@ -91,10 +87,6 @@ function notifyDiscord(imageUrl, payload, location, action) {
 		}
 	}
 
-	console.log('posting data');
-	console.log(data);
-	console.log('to: ' + options.path);
-
 	var httpreq = http.request(options, function (response) {
 		response.setEncoding('utf8');
 		//response.on('data', function (chunk) {
@@ -104,6 +96,7 @@ function notifyDiscord(imageUrl, payload, location, action) {
 			res.send('ok');
 		})
 	});
+
 	httpreq.write(data);
 	httpreq.end();
 
@@ -111,12 +104,9 @@ function notifyDiscord(imageUrl, payload, location, action) {
 }
 
 app.post('/', upload.single('thumb'), function (req, res, next) {
-	console.log('POST received');
 	var payload = JSON.parse(req.body.payload);
 	var isVideo = (payload.Metadata.librarySectionType == "movie" || payload.Metadata.librarySectionType == "show");
 	var isAudio = (payload.Metadata.librarySectionType == "artist");
-
-	console.log('Payload: ', payload);
 
 	if (payload.user == true && payload.Metadata && (isAudio || isVideo)) {
 		var key = sha1(payload.Server.uuid + payload.Metadata.guid);
@@ -124,6 +114,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 		if (payload.event == "media.play" || payload.event == "media.rate") {
 			// Save the image.
 			if (req.file && req.file.buffer) {
+				console.log('Saving the image');
 				lwip.open(req.file.buffer, 'jpg', function (err, image) {
 					image.contain(75, 75, 'white', function (err, smallerImage) {
 						smallerImage.toBuffer('jpg', function (err, buffer) {
@@ -150,9 +141,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 						action = "unrated";
 					}
 				}
-
-
-
+				
 				// Send the event to Discord.
 				redisClient.get(key, function (err, reply) {
 					if (reply) {
