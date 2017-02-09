@@ -77,7 +77,7 @@ function notifyDiscord(imageUrl, payload, location, action) {
 
 	var options = {
 		host: 'discordapp.com',
-		port: '443',
+		port: 443,
 		path: '/api/webhooks/' + webhookKey,
 		method: 'POST',
 		headers: {
@@ -85,6 +85,10 @@ function notifyDiscord(imageUrl, payload, location, action) {
 			'Content-Length': Buffer.byteLength(data)
 		}
 	}
+
+	console.log('posting data');
+	console.log(data);
+	console.log('to: ' + options.path);
 
 	var httpreq = http.request(options, function (response) {
 		response.setEncoding('utf8');
@@ -97,6 +101,8 @@ function notifyDiscord(imageUrl, payload, location, action) {
 	});
 	httpreq.write(data);
 	httpreq.end();
+
+	console.log('post complete');
 }
 
 app.post('/', upload.single('thumb'), function (req, res, next) {
