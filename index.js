@@ -73,7 +73,6 @@ function formatSummary(summary) {
 function notifyDiscord(imageUrl, payload, location, action) {
 	var locationText = '';
 	if (location) {
-		console.log(location);
 		locationText = ' near ' + location.city + ', ' + (location.country_code == 'US' ? location.region_name : location.country_name);
 	}
 
@@ -130,8 +129,6 @@ function notifyDiscord(imageUrl, payload, location, action) {
 
 	//httpreq.write(data);
 	//httpreq.end();
-
-	console.log('post complete');
 }
 
 app.post('/', upload.single('thumb'), function (req, res, next) {
@@ -145,7 +142,6 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 		if (payload.event == "media.play" || payload.event == "media.rate") {
 			// Save the image.
 			if (req.file && req.file.buffer) {
-				console.log('Saving the image');
 				lwip.open(req.file.buffer, 'jpg', function (err, image) {
 					image.contain(75, 75, 'white', function (err, smallerImage) {
 						smallerImage.toBuffer('jpg', function (err, buffer) {
