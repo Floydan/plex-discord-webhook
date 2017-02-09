@@ -50,6 +50,24 @@ function formatSubtitle(metadata) {
 	return ret;
 }
 
+function formatSummary(summary) {
+	var ret = '';
+
+	if (summary) {
+		if (summary.length > 100) {
+			ret = summary.substring(0, 100) + '...';
+		}
+		else {
+			ret = summary;
+		}
+
+		if (ret.length > 0)
+			ret = '\r\n' + ret;
+	}
+
+	return ret;
+}
+
 function notifyDiscord(imageUrl, payload, location, action) {
 	var locationText = '';
 	if (location) {
@@ -62,7 +80,7 @@ function notifyDiscord(imageUrl, payload, location, action) {
 		"embeds": [
 			{
 				"title": formatTitle(payload.Metadata),
-				"description": formatSubtitle(payload.Metadata),
+				"description": formatSubtitle(payload.Metadata) + formatSummary(payload.summary),
 				"footer": {
 					"text": action + " by " + payload.Account.title + " on " + payload.Player.title + " from " + payload.Server.title + locationText,
 					"icon_url": payload.Account.thumb
