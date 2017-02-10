@@ -107,34 +107,10 @@ function notifyDiscord(imageUrl, payload, location, action) {
 		{ json: data },
 		function (error, response, body) {
 			if (!error && response.statusCode == 200) {
-				console.log(body)
+				//console.log(body)
 			}
 		}
 	);
-
-	//var options = {
-	//	host: 'discordapp.com',
-	//	port: 443,
-	//	path: '/api/webhooks/' + webhookKey,
-	//	method: 'POST',
-	//	headers: {
-	//		'Content-Type': 'application/json',
-	//		'Content-Length': Buffer.byteLength(data)
-	//	}
-	//}
-
-	//var httpreq = http.request(options, function (response) {
-	//	response.setEncoding('utf8');
-	//	response.on('data', function (chunk) {
-	//		console.log("body: " + chunk);
-	//	});
-	//	response.on('end', function () {
-	//		//res.send('ok');
-	//	})
-	//});
-
-	//httpreq.write(data);
-	//httpreq.end();
 }
 
 app.post('/', upload.single('thumb'), function (req, res, next) {
@@ -162,6 +138,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 			// Geolocate player.
 			freegeoip.getLocation(payload.Player.publicAddress, function (err, location) {
 
+
 				var action;
 				if (payload.event == "media.scrobble") {
 					action = "played";
@@ -174,13 +151,33 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 						action = "unrated";
 					}
 				}
-				
+
+
+
 				// Send the event to Discord.
 				redisClient.get(key, function (err, reply) {
-					if (reply) {
-						notifyDiscord(appURL + '/images/' + key, payload, location, action);
-					} else {
-						notifyDiscord(null, payload, location, action);
+					if (!location || (location && location.city)) {
+						if (reply) {
+							notifyDiscord(appURL + '/images/' + key, payload, location, action);
+						} else {
+							notifyDiscord(null, payload, location, action);
+						}
+					}
+					else {
+						request.get('http://nominatim.openstreetmap.org/reverse?format=json&lat=' + location.latitude + '&lon=' + location.longitude + '&accept-language=en',
+							function (error, response, body) {
+								if (!error && response.statusCode == 200) {
+									location = JSON.parse(body);
+									location.region_name = location.state;
+								}
+
+								if (reply) {
+									notifyDiscord(appURL + '/images/' + key, payload, location, action);
+								} else {
+									notifyDiscord(null, payload, location, action);
+								}
+							}
+						);
 					}
 				});
 			});
