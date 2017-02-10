@@ -19,7 +19,6 @@
     <Content Include=".gitignore" />
     <Compile Include="index.js" />
     <Content Include="LICENSE" />
-    <Content Include="npm-debug.log" />
     <Content Include="package.json" />
     <Content Include="plex-discord-webhook.njsproj" />
     <Content Include="Procfile" />
