@@ -177,12 +177,9 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 
 						request(options, function (error, response, body) {
 								if (error) console.log('OSM lookup error', error);
-								console.log(response);
 
 								if (!error && response.statusCode == 200) {
-									console.log('OSM lookup success', body);
-
-									location = JSON.parse(body);
+									location = JSON.parse(body).address;
 									location.region_name = location.state;
 								}
 
