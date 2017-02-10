@@ -55,16 +55,17 @@ function formatSubtitle(metadata) {
 function formatSummary(summary) {
 	var ret = '';
 
-	if (summary) {
-		//if (summary.length > 300) {
-		//	ret = summary.substring(0, 300) + '...';
-		//}
-		//else {
-			ret = summary;
-		//}
+	if (summary && summary.length) {
+		if (summary.length > 300) {
+			ret += summary.substring(0, 300) + '...';
+		}
+		else {
+			ret += summary;
+		}
 
-		if (ret.length > 0)
+		if (ret.length > 0) {
 			ret = '\r\n' + ret;
+		}
 	}
 
 	return ret;
@@ -73,7 +74,12 @@ function formatSummary(summary) {
 function notifyDiscord(imageUrl, payload, location, action) {
 	var locationText = '';
 	if (location) {
-		locationText = ' near ' + location.city + ', ' + (location.country_code == 'US' ? location.region_name : location.country_name);
+		if (location.city) {
+			locationText = ' near ' + location.city + ', ' + (location.country_code == 'US' ? location.region_name : location.country_name);
+		}
+		else {
+			locationText = ', ' + (location.country_code == 'US' ? location.region_name : location.country_name);
+		}
 	}
 
 	var data = {
