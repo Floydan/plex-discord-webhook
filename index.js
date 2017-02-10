@@ -169,6 +169,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 						request.get('http://nominatim.openstreetmap.org/reverse?format=json&lat=' + location.latitude + '&lon=' + location.longitude + '&accept-language=en',
 							function (error, response, body) {
 								if (error) console.log('OSM lookup error', error);
+								console.log(response);
 
 								if (!error && response.statusCode == 200) {
 									console.log('OSM lookup success', body);
