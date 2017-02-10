@@ -181,6 +181,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 								if (!error && response.statusCode == 200) {
 									location = JSON.parse(body).address;
 									location.region_name = location.state;
+									location.country_name = location.country;
 								}
 
 								if (reply) {
