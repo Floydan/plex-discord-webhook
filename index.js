@@ -166,8 +166,16 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 					}
 					else {
 						console.log('location city missing, trying OSM lat lng lookup');
-						request.get('http://nominatim.openstreetmap.org/reverse?format=json&lat=' + location.latitude + '&lon=' + location.longitude + '&accept-language=en',
-							function (error, response, body) {
+
+						var options = {
+							url: 'http://nominatim.openstreetmap.org/reverse?format=json&lat=' + location.latitude + '&lon=' + location.longitude + '&accept-language=en',
+							method: 'GET',
+							headers: {
+								'User-Agent': 'hoglund.joakim@gmail.com'
+							}
+						};
+
+						request(options, function (error, response, body) {
 								if (error) console.log('OSM lookup error', error);
 								console.log(response);
 
