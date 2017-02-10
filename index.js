@@ -156,7 +156,8 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 
 				// Send the event to Discord.
 				redisClient.get(key, function (err, reply) {
-					if (!location || (location && location.city && location.city.length > 0)) {
+					console.log('location', location);
+					if (!location || (location && location.city && location.city.length > 1)) {
 						if (reply) {
 							notifyDiscord(appURL + '/images/' + key, payload, location, action);
 						} else {
@@ -164,9 +165,14 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 						}
 					}
 					else {
+						console.log('location city missing, trying OSM lat lng lookup');
 						request.get('http://nominatim.openstreetmap.org/reverse?format=json&lat=' + location.latitude + '&lon=' + location.longitude + '&accept-language=en',
 							function (error, response, body) {
+								if (error) console.log('OSM lookup error', error);
+
 								if (!error && response.statusCode == 200) {
+									console.log('OSM lookup success', body);
+
 									location = JSON.parse(body);
 									location.region_name = location.state;
 								}
