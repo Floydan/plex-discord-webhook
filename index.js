@@ -156,7 +156,6 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 
 				// Send the event to Discord.
 				redisClient.get(key, function (err, reply) {
-					console.log('location', location);
 					if (!location || (location && location.city && location.city.length > 1)) {
 						if (reply) {
 							notifyDiscord(appURL + '/images/' + key, payload, location, action);
