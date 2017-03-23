@@ -64,7 +64,7 @@ function formatSummary(summary) {
 		}
 
 		if (ret.length > 0) {
-			ret = '\r\n' + ret;
+			ret = '\r\n\r\n' + ret;
 		}
 	}
 
