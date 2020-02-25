@@ -1,16 +1,14 @@
 ﻿var express = require('express')
 	, request = require('request')
-	, path = require('path')
-	, multer = require('multer')
-	, redis = require("redis")
-	, lwip = require('lwip')
+    , multer = require('multer')
+	, redis = require('redis')
+	//, lwip = require('lwip')
+	, jimp = require('jimp')
 	, sha1 = require('sha1')
-	, fs = require('fs')
-	, freegeoip = require('node-freegeoip')
-	, qs = require('querystring');
+	, freegeoip = require('node-freegeoip');
 
 // Configuration.
-var appURL = 'https://plex-discord-webhook.herokuapp.com';
+var appUrl = 'https://plex-discord-webhook.herokuapp.com';
 var webhookKey = process.env.DISCORD_WEBHOOK_KEY;
 
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, { return_buffers: true });
@@ -23,9 +21,9 @@ function formatTitle(metadata) {
 	if (metadata.grandparentTitle) {
 		return metadata.grandparentTitle;
 	} else {
-		var ret = metadata.title;
+		let ret = metadata.title;
 		if (metadata.year) {
-			ret += ' (' + metadata.year + ')';
+			ret += ` (${metadata.year})`;
 		}
 		return ret;
 	}
@@ -34,18 +32,18 @@ function formatTitle(metadata) {
 function formatSubtitle(metadata) {
 	var ret = '';
 	if (metadata.grandparentTitle) {
-		if (metadata.type == 'track') {
+		if (metadata.type === 'track') {
 			ret = metadata.parentTitle;
 		} else if (metadata.index && metadata.parentIndex) {
-			ret = "S" + metadata.parentIndex + " E" + metadata.index;
+			ret = `S${metadata.parentIndex} E${metadata.index}`;
 		} else if (metadata.originallyAvailableAt) {
 			ret = metadata.originallyAvailableAt;
 		}
 
 		if (metadata.title) {
-			ret += ' - ' + metadata.title;
+			ret += ` - ${metadata.title}`;
 		}
-	} else if (metadata.type == 'movie') {
+	} else if (metadata.type === 'movie') {
 		ret = metadata.tagline;
 	}
 
@@ -64,7 +62,7 @@ function formatSummary(summary) {
 		}
 
 		if (ret.length > 0) {
-			ret = '\r\n\r\n' + ret;
+			ret = `\r\n\r\n${ret}`;
 		}
 	}
 
@@ -75,38 +73,38 @@ function notifyDiscord(imageUrl, payload, location, action) {
 	var locationText = '';
 	if (location) {
 		if (location.city) {
-			locationText = ' near ' + location.city + ', ' + (location.country_code == 'US' ? location.region_name : location.country_name);
+			locationText = ` near ${location.city}, ${(location.country_code === 'US' ? location.region_name : location.country_name)}`;
 		}
 		else {
-			locationText = ', ' + (location.country_code == 'US' ? location.region_name : location.country_name);
+			locationText = `, ${(location.country_code === 'US' ? location.region_name : location.country_name)}`;
 		}
 	}
 
-	var data = {
-		"content": "",
-		"username": "Plex",
-		"avatar_url": appURL + "/plex-icon.png",
+	const data = {
+		"content": '',
+		"username": 'Plex',
+		"avatar_url": appUrl + '/plex-icon.png',
 		"embeds": [
 			{
 				"title": formatTitle(payload.Metadata),
 				"description": formatSubtitle(payload.Metadata) + formatSummary(payload.Metadata.summary),
 				"footer": {
-					"text": action + " by " + payload.Account.title + " on " + payload.Player.title + " from " + payload.Server.title + locationText,
+					"text": `${action} by ${payload.Account.title} on ${payload.Player.title} from ${payload.Server.title} ${locationText}`,
 					"icon_url": payload.Account.thumb
 				},
 				"thumbnail": {
 					"url": imageUrl,
 					"height": 200,
-					"width": "200"
+					"width": '200'
 				}
 			}
 		]
 	};
 
-	request.post('https://discordapp.com/api/webhooks/' + webhookKey,
+	request.post(`https://discordapp.com/api/webhooks/${webhookKey}`,
 		{ json: data },
 		function (error, response, body) {
-			if (!error && response.statusCode == 200) {
+			if (!error && response.statusCode === 200) {
 				//console.log(body)
 			}
 		}
@@ -115,40 +113,40 @@ function notifyDiscord(imageUrl, payload, location, action) {
 
 app.post('/', upload.single('thumb'), function (req, res, next) {
 	var payload = JSON.parse(req.body.payload);
-	var isVideo = (payload.Metadata.librarySectionType == "movie" || payload.Metadata.librarySectionType == "show");
-	var isAudio = (payload.Metadata.librarySectionType == "artist");
+	const isVideo = payload.Metadata.librarySectionType === 'movie' || payload.Metadata.librarySectionType === 'show';
+	const isAudio = payload.Metadata.librarySectionType === 'artist';
 
-	if (payload.user == true && payload.Metadata && (isAudio || isVideo)) {
+	if (payload.user === true && payload.Metadata && (isAudio || isVideo)) {
 		var key = sha1(payload.Server.uuid + payload.Metadata.guid);
 
-		if (payload.event == "media.play" || payload.event == "media.rate") {
+		if (payload.event === 'media.play' || payload.event === 'media.rate') {
 			// Save the image.
 			if (req.file && req.file.buffer) {
-				lwip.open(req.file.buffer, 'jpg', function (err, image) {
-					image.contain(75, 75, 'white', function (err, smallerImage) {
-						smallerImage.toBuffer('jpg', function (err, buffer) {
-							redisClient.setex(key, 7 * 24 * 60 * 60, buffer);
-						});
+				jimp.read(req.file.buffer)
+					.then(image => {
+						image.contain(75, 75)
+							.getBuffer(jimp.MIME_JPEG,
+								buffer => {
+									redisClient.setex(key, 7 * 24 * 60 * 60, buffer);
+								});
 					});
-				});
 			}
 		}
 
-		if ((payload.event == "media.scrobble" && isVideo) || payload.event == "media.rate") {
+		if ((payload.event === 'media.scrobble' && isVideo) || payload.event === 'media.rate') {
 			// Geolocate player.
 			freegeoip.getLocation(payload.Player.publicAddress, function (err, location) {
-
-
+				
 				var action;
-				if (payload.event == "media.scrobble") {
-					action = "played";
+				if (payload.event === 'media.scrobble') {
+					action = 'played';
 				} else {
 					if (payload.rating > 0) {
-						action = "rated ";
+						action = 'rated ';
 						for (var i = 0; i < payload.rating / 2; i++)
-							action += "★";
+							action += '★';
 					} else {
-						action = "unrated";
+						action = 'unrated';
 					}
 				}
 
@@ -158,7 +156,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 				redisClient.get(key, function (err, reply) {
 					if (!location || (location && location.city && location.city.length > 1)) {
 						if (reply) {
-							notifyDiscord(appURL + '/images/' + key, payload, location, action);
+							notifyDiscord(appUrl + '/images/' + key, payload, location, action);
 						} else {
 							notifyDiscord(null, payload, location, action);
 						}
@@ -167,7 +165,7 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 						console.log('location city missing, trying OSM lat lng lookup');
 
 						var options = {
-							url: 'http://nominatim.openstreetmap.org/reverse?format=json&lat=' + location.latitude + '&lon=' + location.longitude + '&accept-language=en',
+							url: `http://nominatim.openstreetmap.org/reverse?format=json&lat=${location.latitude}&lon=${location.longitude}&accept-language=en`,
 							method: 'GET',
 							headers: {
 								'User-Agent': 'hoglund.joakim@gmail.com'
@@ -175,20 +173,20 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 						};
 
 						request(options, function (error, response, body) {
-								if (error) console.log('OSM lookup error', error);
+							if (error) console.log('OSM lookup error', error);
 
-								if (!error && response.statusCode == 200) {
-									location = JSON.parse(body).address;
-									location.region_name = location.state;
-									location.country_name = location.country;
-								}
-
-								if (reply) {
-									notifyDiscord(appURL + '/images/' + key, payload, location, action);
-								} else {
-									notifyDiscord(null, payload, location, action);
-								}
+							if (!error && response.statusCode === 200) {
+								location = JSON.parse(body).address;
+								location.region_name = location.state;
+								location.country_name = location.country;
 							}
+
+							if (reply) {
+								notifyDiscord(appUrl + '/images/' + key, payload, location, action);
+							} else {
+								notifyDiscord(null, payload, location, action);
+							}
+						}
 						);
 					}
 				});
