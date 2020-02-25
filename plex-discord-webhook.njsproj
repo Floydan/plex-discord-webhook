@@ -13,9 +13,10 @@
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">14.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <StartWebBrowser>True</StartWebBrowser>
-    <Environment>REDISCLOUD_URL = "redis://rediscloud:rBY8nZUjACnQN1Xk@redis-11729.c3.eu-west-1-2.ec2.cloud.redislabs.com:11729"
-DISCORD_WEBHOOK_KEY = "279401145296748544/gPy8je4jUVY3MzsvIvFd9o7tluKnp8SWavdwi0JwCpphKGLdadlsE8Dv4hb65hkd0hFA"</Environment>
+    <Environment>REDISCLOUD_URL=redis://rediscloud:rBY8nZUjACnQN1Xk@redis-11729.c3.eu-west-1-2.ec2.cloud.redislabs.com:11729
+DISCORD_WEBHOOK_KEY=279401145296748544/gPy8je4jUVY3MzsvIvFd9o7tluKnp8SWavdwi0JwCpphKGLdadlsE8Dv4hb65hkd0hFA</Environment>
     <NodejsPort>1337</NodejsPort>
+    <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
