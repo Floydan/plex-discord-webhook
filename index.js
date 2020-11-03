@@ -1,6 +1,6 @@
 ﻿var express = require('express')
 	, request = require('request')
-    , multer = require('multer')
+	, multer = require('multer')
 	, redis = require('redis')
 	//, lwip = require('lwip')
 	, jimp = require('jimp')
@@ -8,7 +8,7 @@
 	, freegeoip = require('node-freegeoip');
 
 // Configuration.
-var appUrl = 'https://plex-discord-webhook.herokuapp.com';
+var appUrl = process.env.APP_URL || 'https://plex-discord-webhook.herokuapp.com';
 var webhookKey = process.env.DISCORD_WEBHOOK_KEY;
 
 var redisClient = redis.createClient(process.env.REDISCLOUD_URL, { return_buffers: true });
@@ -133,14 +133,14 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 			}
 		}
 
-		if ((payload.event === 'media.scrobble' && isVideo) || payload.event === 'media.rate') {
+		if ((payload.event === 'media.scrobble' && isVideo) || payload.event === 'media.rate' || payload.event === 'media.play') {
 			// Geolocate player.
 			freegeoip.getLocation(payload.Player.publicAddress, function (err, location) {
-				
+
 				var action;
-				if (payload.event === 'media.scrobble') {
+				if (payload.event === 'media.scrobble' || payload.event === 'media.play') {
 					action = 'played';
-				} else {
+				} else if (payload.event === 'media.rate') {
 					if (payload.rating > 0) {
 						action = 'rated ';
 						for (var i = 0; i < payload.rating / 2; i++)
@@ -149,8 +149,6 @@ app.post('/', upload.single('thumb'), function (req, res, next) {
 						action = 'unrated';
 					}
 				}
-
-
 
 				// Send the event to Discord.
 				redisClient.get(key, function (err, reply) {
