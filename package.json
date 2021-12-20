@@ -10,7 +10,7 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.17.2",
     "jimp": "0.16.1",
     "multer": "^1.4.3",
     "node-freegeoip": "0.0.1",
